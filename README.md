@@ -12,7 +12,7 @@ This scripts does the following:
 ## Setup
 
 1. `cp env.dist mydb1.env`
-2. `vim mydb.env`
+2. `vim mydb1.env`
 3. `./db_backup`
 
 Automate with cron.
