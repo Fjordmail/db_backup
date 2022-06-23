@@ -9,7 +9,7 @@ This scripts does the following:
 - Downloads (ssh) the dump file;
 - Compresses (xz) the dump file.
 
-# Setup
+## Setup
 
 1. `cp env.dist mydb1.env`
 2. `vim mydb.env`
