@@ -23,6 +23,8 @@ main() {
 
     readonly bk_mount='/mnt/volume_fra1_01'
 
+    printf '%s - Starting backup...\n' "$(date)"
+
     find "$path"/* -maxdepth 1 -name '*.env' | while read env_file; do
         set -a; . "$env_file"; set +a
         fetch_dump
@@ -30,6 +32,8 @@ main() {
 
     compress_dumps
     delete_old
+
+    printf '%s - Done.\n\n' "$(date)"
 }
 
 # Connect to remote server and dump DB
