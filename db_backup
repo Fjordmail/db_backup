@@ -38,8 +38,8 @@ main() {
 
 # Connect to remote server and dump DB
 fetch_dump() {
-    readonly bk_name="$BK_DB_NAME.$(date +'%F_%H-%m').sql"
-    readonly bk_volume="$bk_mount/$BK_DB_NAME"
+    bk_name="$BK_DB_NAME.$(date +'%F_%H-%m').sql"
+    bk_volume="$bk_mount/$BK_DB_NAME"
     mkdir -p "$bk_volume"
 
     # Creating backup remotely
@@ -56,13 +56,13 @@ fetch_dump() {
         || ssh $BK_SSH_HOST "mysqldump -u $BK_DB_USER -p$BK_DB_PW --no-data $BK_DB_NAME $(echo "$BK_TABLES_NODATA" | sed 's/,/ /g') >> '/tmp/$bk_name'"
 
     # Checksum
-    readonly remote_sum="$(ssh "$BK_SSH_HOST" "md5sum '/tmp/$bk_name'" | awk '{ print $1 }')"
+    remote_sum="$(ssh "$BK_SSH_HOST" "md5sum '/tmp/$bk_name'" | awk '{ print $1 }')"
 
     # Download backup and delete from remote
     printf '%s - %s - Fetching remote dump...\n' "$(date)" "$BK_DB_NAME"
     scp $BK_SSH_HOST:"/tmp/$bk_name" "$bk_volume/"
     ssh $BK_SSH_HOST "rm /tmp/$bk_name"
-    readonly local_sum="$(md5sum "$bk_volume/$bk_name" | awk '{ print $1 }')"
+    local_sum="$(md5sum "$bk_volume/$bk_name" | awk '{ print $1 }')"
 
     # Init backup log
     printf '%s - %s - Checking integrity...\n' "$(date)" "$BK_DB_NAME"
@@ -70,8 +70,8 @@ fetch_dump() {
 
     # Find backup state
     [ "$remote_sum" = "$local_sum" ] \
-        && readonly bk_state='OK' \
-        || readonly bk_state='NOK'
+        && bk_state='OK' \
+        || bk_state='NOK'
 
     # Log
     printf '%s,%s,%s,%s\n' "$bk_name" "$remote_sum" "$local_sum" "$bk_state" >> "$bk_volume/backup.log"
