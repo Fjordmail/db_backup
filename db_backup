@@ -25,7 +25,7 @@ main() {
 
     printf '%s - Starting backup...\n' "$(date)"
 
-    find "$path"/* -maxdepth 1 -name '*.env' | while read env_file; do
+    find "$path" -maxdepth 1 -name '*.env' | while read env_file; do
         set -a; . "$env_file"; set +a
         fetch_dump
     done
@@ -81,7 +81,7 @@ fetch_dump() {
 # Compress dump
 compress_dumps() {
     printf '%s - Compressing dumps...\n' "$(date)"
-    find "$bk_mount"/* -name *.sql -exec xz -9 {} \;
+    find "$bk_mount" -name *.sql -exec xz -9 {} \;
 }
 
 # Delete old dumps
@@ -89,7 +89,7 @@ delete_old() {
     printf '%s - Deleting old dumps...\n' "$(date)"
 
     # Delete files older than 30 days
-    find "$bk_mount"/* -name *.xz -mtime +30 -exec rm {} \;
+    find "$bk_mount" -name *.xz -mtime +30 -exec rm {} \;
 }
 
 #######################################
