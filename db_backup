@@ -45,7 +45,7 @@ fetch_dump() {
     # Creating backup remotely
     printf '%s - %s - Creating remote dump...\n' "$(date)" "$BK_DB_NAME"
 
-    # Backup structure AND date
+    # Backup structure AND data
     [ -z "$BK_TABLES_NODATA" ] \
         && opts='' \
         || opts="--ignore-table=$BK_DB_NAME.$(echo "$BK_TABLES_NODATA" | sed "s/,/--ignore-table=$BK_DB_NAME\./g")"
