@@ -42,6 +42,14 @@ fetch_dump() {
     bk_volume="$bk_mount/$BK_DB_NAME"
     mkdir -p "$bk_volume"
 
+    # SSH opts
+    ssh_opts=''
+    scp_opts=''
+    if [ ! -z "$BK_SSH_PORT" ]; then
+        ssh_opts="-p $BK_SSH_PORT"
+        scp_opts="-P $BK_SSH_PORT"
+    fi
+
     # Creating backup remotely
     printf '%s - %s - Creating remote dump...\n' "$(date)" "$BK_DB_NAME"
 
@@ -49,19 +57,19 @@ fetch_dump() {
     [ -z "$BK_TABLES_NODATA" ] \
         && opts='' \
         || opts="--ignore-table=$BK_DB_NAME.$(echo "$BK_TABLES_NODATA" | sed "s/,/--ignore-table=$BK_DB_NAME\./g")"
-    ssh -n -p "$BK_SSH_PORT" $BK_SSH_HOST "mysqldump -u $BK_DB_USER -p$BK_DB_PW $opts $BK_DB_NAME > '/tmp/$bk_name'"
+    ssh -n $ssh_opts $BK_SSH_HOST "mysqldump -u $BK_DB_USER -p$BK_DB_PW $opts $BK_DB_NAME > '/tmp/$bk_name'"
 
     # Backup ONLY structure
     [ -z "$BK_TABLES_NODATA" ] \
-        || ssh -n -p "$BK_SSH_PORT" $BK_SSH_HOST "mysqldump -u $BK_DB_USER -p$BK_DB_PW --no-data $BK_DB_NAME $(echo "$BK_TABLES_NODATA" | sed 's/,/ /g') >> '/tmp/$bk_name'"
+        || ssh -n $ssh_opts $BK_SSH_HOST "mysqldump -u $BK_DB_USER -p$BK_DB_PW --no-data $BK_DB_NAME $(echo "$BK_TABLES_NODATA" | sed 's/,/ /g') >> '/tmp/$bk_name'"
 
     # Checksum
-    remote_sum="$(ssh -n -p "$BK_SSH_PORT" "$BK_SSH_HOST" "md5sum '/tmp/$bk_name'" | awk '{ print $1 }')"
+    remote_sum="$(ssh -n $ssh_opts "$BK_SSH_HOST" "md5sum '/tmp/$bk_name'" | awk '{ print $1 }')"
 
     # Download backup and delete from remote
     printf '%s - %s - Fetching remote dump...\n' "$(date)" "$BK_DB_NAME"
-    scp -P "$BK_SSH_PORT" $BK_SSH_HOST:"/tmp/$bk_name" "$bk_volume/"
-    ssh -n -p "$BK_SSH_PORT" $BK_SSH_HOST "rm /tmp/$bk_name"
+    scp $scp_opts $BK_SSH_HOST:"/tmp/$bk_name" "$bk_volume/"
+    ssh -n $ssh_opts $BK_SSH_HOST "rm /tmp/$bk_name"
     local_sum="$(md5sum "$bk_volume/$bk_name" | awk '{ print $1 }')"
 
     # Init backup log
